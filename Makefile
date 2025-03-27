@@ -3,3 +3,6 @@ build:
 
 run:
 	./bin/main.out
+
+all:
+	make build && make run
