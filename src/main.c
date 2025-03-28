@@ -134,9 +134,11 @@ int shell_launch(char **args) {
         }
 
         exit(EXIT_FAILURE);
-    } else if (pid < 0) {
+    } 
+    else if (pid < 0) {
         perror("shell");
-    } else {
+    } 
+    else {
         
         do {
             wpid = waitpid(pid, &status, WUNTRACED);
