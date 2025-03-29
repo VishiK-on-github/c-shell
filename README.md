@@ -1,3 +1,3 @@
 ### C Shell
 
-This repo contains code to make a UNIX shell in C.
+This repo contains code to make a simple UNIX shell in C.
