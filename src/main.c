@@ -7,10 +7,12 @@
 #define SHELL_TOKEN_BUFFER_SIZE 64
 #define SHELL_TOKEN_DELIM " \t\r\n\a"
 
+// function declarations for shell builtins
 int shell_cd(char **args);
 int shell_help(char **args);
 int shell_exit(char **args);
 
+// list of builtin commands
 char *builtin_str[] ={
     "cd",
     "help",
@@ -23,11 +25,16 @@ int (*builtin_func[]) (char **) = {
     &shell_exit
 };
 
+// returns number of shell builtins
 int shell_num_builtins() {
     return sizeof(builtin_str) / sizeof(char*);
 }
 
+// we implement cd shell builtin using chdir()
 int shell_cd(char **args) {
+    // checking if we have any args if no then print error
+    // if yes then chdir using the token at index 1
+    // cmd: cd path. index 0: cd, index 1: path
     if (args[1] == NULL) {
         fprintf(stderr, "shell: expected \"cd\"\n");
     } else {
@@ -38,6 +45,8 @@ int shell_cd(char **args) {
     return 1;
 }
 
+// implementing help builtin
+// we just print the builtins for now
 int shell_help(char **args) {
     int i;
     printf("Vishu's Shell\n");
@@ -51,6 +60,8 @@ int shell_help(char **args) {
     return 1;
 }
 
+// implement the exit shell builtin
+// exits process with zero code
 int shell_exit(char **args) {
     return 0;
 }
@@ -122,11 +133,18 @@ char **shell_split_line(char *line) {
 }
 
 int shell_launch(char **args) {
+
+    // init pid and wait pid
     pid_t pid, wpid;
     int status;
 
+    // we create a child process
+    // pid we get in parent process is
+    // the pid of the child process 
+    // but in the child process the pid value becomes zero
     pid = fork();
 
+    // the child process code executes here
     if (pid == 0) {
 
         if (execvp(args[0], args) == -1) {
@@ -135,9 +153,14 @@ int shell_launch(char **args) {
 
         exit(EXIT_FAILURE);
     } 
+    // this condition is to check if we 
+    // the fork has happened correctly
     else if (pid < 0) {
         perror("shell");
     } 
+    // the parent process will wait here until 
+    // the child process have exited with some 
+    // error code or if we have any signals
     else {
         
         do {
@@ -151,16 +174,25 @@ int shell_launch(char **args) {
 int shell_exe_line(char **args) {
     int i;
 
+    // if we have no args we return non 0 code
     if (args[0] == NULL) {
         return 1;
     }
 
+    // we run a for loop to check which builtin a
+    // the command specified by args[0] matches to which builtin
     for (i = 0; i < shell_num_builtins(); i++) {
         if (strcmp(args[0], builtin_str[i]) == 0) {
+            // since we have a match we invoke 
+            // the builtin with specified args
             return (*builtin_func[i])(args);
         }
     }
 
+    // since we couldn't find a match we 
+    // ask tell execvp in shell_launch to
+    // infer the program to execute from 
+    // args[0] and execute it with required params
     return shell_launch(args);
 }
 
